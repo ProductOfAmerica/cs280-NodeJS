@@ -1,0 +1,380 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- saved from url=(0079)http://dw.convertfiles.com/files/0784254001476943916/chat%20rest%20service.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+	
+	<title></title>
+	<meta name="GENERATOR" content="OpenOffice 4.1.1  (FreeBSD/amd64)">
+	<meta name="CREATED" content="20161019;23122200">
+	<meta name="CHANGED" content="0;0">
+	<meta name="AppVersion" content="16.0000">
+	<meta name="DocSecurity" content="0">
+	<meta name="HyperlinksChanged" content="false">
+	<meta name="LinksUpToDate" content="false">
+	<meta name="ScaleCrop" content="false">
+	<meta name="ShareDoc" content="false">
+	<style type="text/css">
+	<!--
+		@page { size: 11in 11in; margin-left: 1.42in; margin-right: 1.42in; margin-top: 1in; margin-bottom: 1in }
+		P { margin-bottom: 0.08in; direction: ltr; color: #000000; widows: 2; orphans: 2 }
+	-->
+	</style>
+</head>
+<body lang="en-US" text="#000000" dir="LTR">
+<p align="CENTER" style="margin-bottom: 0.11in"><font face="Times New Roman, serif"><font size="5" style="font-size: 20pt"><b>Chat
+REST Service</b></font></font></p>
+<p align="CENTER" style="margin-bottom: 0.11in"><font face="Times New Roman, serif">Copyright
+2013-2016, Clinton Staley</font></p>
+<p align="CENTER" style="margin-bottom: 0.11in"><br><br>
+</p>
+<p style="margin-bottom: 0.11in"><font face="Times New Roman, serif"><font size="5"><b>Spec
+Changes</b></font></font></p>
+<ol>
+	<li><p style="margin-bottom: 0.11in; line-height: 100%"><font face="Times New Roman, serif">Added
+	forbiddenFields error tag, and use of this in various resources e.g.
+	Prss/{id} PUT</font></p>
+	</li><li><p style="margin-bottom: 0.11in; line-height: 100%"><font face="Times New Roman, serif">Ditto
+	for oldPwdMismatch error tag.</font></p>
+	</li><li><p style="margin-bottom: 0.11in; line-height: 100%"><font face="Times New Roman, serif">(10/19)
+	Clarified get-parameter rules, adjusted a couple of error tags,
+	fixed references to Attempts.</font></p>
+	</li><li><p style="margin-bottom: 0.11in; line-height: 100%"><font face="Times New Roman, serif">(10/19)
+	Clarified behavior of Prss/{id} DELETE</font></p>
+	</li><li><p style="margin-bottom: 0.11in; line-height: 100%"><font face="Times New Roman, serif">(10/19)
+	Clarified that 404 is returned for unknown URIs</font></p>
+	</li><li><p style="margin-bottom: 0.11in; line-height: 100%"><font face="Times New Roman, serif">(10/19)
+	Changed "login" to "email" in Msgs, and adjusted
+	error return for /Ssns POST with bad login.</font></p>
+</li></ol>
+<p style="margin-bottom: 0.11in"><br><br>
+</p>
+<p style="margin-bottom: 0.11in"><font face="Times New Roman, serif"><font size="5"><b>Overview</b></font></font></p>
+<p style="margin-bottom: 0.11in"><font face="Times New Roman, serif">The
+Chat REST Service (CHS) provides the interface needed to interact
+with a site that tracks users, conversations, and posts to those
+conversations. The site tracks many different conversations, and any
+use may make a post to any conversation, see other user's posts, etc.</font></p>
+<p style="margin-bottom: 0.11in"><br><br>
+</p>
+<p style="margin-bottom: 0.11in"><font face="Times New Roman, serif"><font size="5"><b>General
+Points</b></font></font></p>
+<p style="margin-bottom: 0.11in"><font face="Times New Roman, serif">The
+following design points apply across the document.</font></p>
+<ol>
+	<li><p style="margin-bottom: 0.11in"><font face="Times New Roman, serif">All
+	resource URLs are prefixed by some root URL, (e.g.
+	http://www.softwareinventions.com/CHS/Prss)</font></p>
+	</li><li><p style="margin-bottom: 0.11in"><font face="Times New Roman, serif">All
+	resources accept and provide only JSON body content.</font></p>
+	</li><li><p style="margin-bottom: 0.11in"><font face="Times New Roman, serif">Some
+	GET operations allow get-parameters. These are listed directly after
+	the GET word. All get-parameters are optional unless given in bold.</font></p>
+	</li><li><p style="margin-bottom: 0.11in"><font face="Times New Roman, serif">Absent
+	documentation to the contrary, all DELETE calls, POST, and PUT calls
+	return, via JSON body content, a list of JSON objects describing any
+	errors that occured, if the HTTP response is not 200. Per REST
+	standards, 200 results return empty body for DELETE. Error objects
+	are of form {tag: {errorTag}, params: {params}} where errorTag is a
+	string tag identifying the error, and params is a possibly-empty
+	array of additional values needed to fill in details about the
+	error. E.g. {tag: "missingField", params: ["lastName"]}</font></p>
+	</li><li><p style="margin-bottom: 0.11in"><font face="Times New Roman, serif">Resource
+	documentation will list possible errors only when the error is not
+	obvious from the list below. Relevant errors may appear in any order
+	in the body. Missing field errors are checked first, and no further
+	errors are reported if missing fields are found.</font></p>
+	</li><li><p style="margin-bottom: 0.11in"><font face="Times New Roman, serif">All
+	resource-creating POST calls return the newly created resource as a
+	URI via the Location response header, not in the response body. The
+	respose body for such POSTs is reserved for error information, per
+	point 4.</font></p>
+	</li><li><p style="margin-bottom: 0.11in"><font face="Times New Roman, serif">GET
+	calls return either HTTP code OK and the specified information in
+	the body, or BAD_REQUEST and a list of error strings, or
+	UNAUTHORIZED for missing login, or FORBIDDEN for insufficient
+	authorization despite login or NOT_FOUND for a URI that is not
+	described in the REST spec. Response body is empty in the latter two
+	cases. Get calls whose specified information is a list will return
+	an array, even if it has just one or even zero elements.</font></p>
+	</li><li><p style="margin-bottom: 0.11in"><font face="Times New Roman, serif">Fields
+	of JSON content for POST and PUT calls are assumed to be strings,
+	booleans, ints, or doubles without further documentation where
+	obvious by their name or intent. In nonobvious cases, the docs give
+	the type explicitly.</font></p>
+	</li><li><p style="margin-bottom: 0.11in"><font face="Times New Roman, serif">All
+	access requires authentication via login; no resources are public
+	except for Prss/POST (for initial registration), and Ssns/POST (to
+	log in). Other resources may be restricted based on admin status of
+	Authenticated User (AU). The default restriction is to allow only
+	access relevant to the AU, unless AU is admin, in which case access
+	to any Person's info is allowed.</font></p>
+</li></ol>
+<p style="margin-bottom: 0.11in"><br><br>
+</p>
+<p style="margin-bottom: 0.11in"><font face="Times New Roman, serif"><font size="5"><b>Error
+Codes</b></font></font></p>
+<p style="margin-bottom: 0.11in"><font face="Times New Roman, serif">The
+possible error codes, and any parameters, are as follows.</font></p>
+<p style="margin-left: 0.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><i>noLogin</i></font><font face="Times New Roman, serif">&nbsp;Not
+logged in</font></p>
+<p style="margin-left: 0.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><i>noPermission</i></font><font face="Times New Roman, serif">
+Logged in, but not permitted to do this</font></p>
+<p style="margin-left: 0.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><i>missingField</i></font><font face="Times New Roman, serif">&nbsp;Field
+missing from request. Params[0] gives field name</font></p>
+<p style="margin-left: 0.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><i>badValue</i></font><font face="Times New Roman, serif">&nbsp;Field
+has bad value. Params[0] gives field name</font></p>
+<p style="margin-left: 0.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><i>notFound</i></font><font face="Times New Roman, serif">&nbsp;Entity
+not present in DB -- for cases where a Conversation, Person, etc. is
+not there.</font></p>
+<p style="margin-left: 0.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><i>badLogin</i></font><font face="Times New Roman, serif">
+Email/password combination invalid, for errors logging.</font></p>
+<p style="margin-left: 0.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><i>dupEmail</i></font><font face="Times New Roman, serif">
+Email duplicates an existing email</font></p>
+<p style="margin-left: 0.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><i>noTerms</i></font><font face="Times New Roman, serif">
+Acceptance of terms is required</font></p>
+<p style="margin-left: 0.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><i>forbiddenRole</i></font><font face="Times New Roman, serif">
+Role specified is not permitted.</font></p>
+<p style="margin-left: 0.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><i>noOldPwd</i></font><font face="Times New Roman, serif">
+Change of password requires an old password</font></p>
+<p style="margin-left: 0.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><i>oldPwdMismatch</i></font><font face="Times New Roman, serif">
+Old password that was provided is incorrect.</font></p>
+<p style="margin-left: 0.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><i>dupTitle</i></font><font face="Times New Roman, serif">
+Conversation title duplicates an existing one</font></p>
+<p style="margin-left: 0.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><i>dupEnrollment</i></font><font face="Times New Roman, serif">
+Duplicate enrollment</font></p>
+<p style="margin-left: 0.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><i>forbiddenField</i></font><font face="Times New Roman, serif">&nbsp;Field
+in body not allowed. Params[0] gives field name.</font></p>
+<p style="margin-left: 0.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><i>queryFailed</i></font><font face="Times New Roman, serif">
+Query failed (server problem)</font></p>
+<p style="margin-bottom: 0.11in"><br><br>
+</p>
+<p style="margin-bottom: 0.11in"><br><br>
+</p>
+<p style="margin-bottom: 0.11in; page-break-before: always"><a name="_GoBack"></a>
+<font face="Times New Roman, serif"><font size="6" style="font-size: 22pt"><b>Resources
+for User Management, including Registration</b></font></font></p>
+<p style="margin-bottom: 0.11in"><font color="#7030a0"><font face="Times New Roman, serif"><font size="4"><b>(Admin
+use in purple)</b></font></font></font></p>
+<p style="margin-bottom: 0.11in"><font color="#2e74b5"><font face="Times New Roman, serif"><font size="4"><b>(Version
+2 in blue)</b></font></font></font></p>
+<p style="margin-left: 0.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><font size="5"><u><b>Prss</b></u></font></font></p>
+<p style="margin-left: 0.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif">Collection
+of all current students or other users.</font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><font size="4"><i><b>GET</b></i></font></font><font face="Times New Roman, serif">
+email={email or email prefix}</font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font face="Times New Roman, serif">Returns
+list of zero or more Persons, as resource URLs. Limits response to
+Persons with specified email or email prefix, if applicable. No data
+for other than the AU is returned in any event, unless the AU is an
+admin. Data per person:</font></p>
+<p style="margin-left: 1.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><i>email</i></font><font face="Times New Roman, serif">&nbsp;principal
+string identifier, unique across all Persons</font></p>
+<p style="margin-left: 1.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><i>id</i></font><font face="Times New Roman, serif">&nbsp;id
+of person with said email, so that URI would be Prss/{id}</font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><font size="4"><i><b>POST</b></i></font></font></p>
+<p style="margin-left: 0.5in; text-indent: 0.5in; margin-bottom: 0.11in">
+<font face="Times New Roman, serif">Adds a new Person, returning
+newly added Person. No AU required, as this resource/verb is used for
+registration.</font></p>
+<p style="margin-left: 1.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><i>email</i></font><font face="Times New Roman, serif">&nbsp;unique
+Email for new person</font></p>
+<p style="margin-left: 1.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><i>firstName</i></font></p>
+<p style="margin-left: 1.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><i>lastName</i></font></p>
+<p style="margin-left: 1.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><i>password</i></font></p>
+<p style="margin-left: 1.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><i>role</i></font><font face="Times New Roman, serif">&nbsp;0
+for student, 1 for admin</font></p>
+<p style="margin-left: 1.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><i>termsAccepted</i></font><font face="Times New Roman, serif">&nbsp;boolean--were
+site terms and conditions accepted?</font></p>
+<p style="margin-left: 1.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif">Email
+and lastName required. Error if email is nonunique. Error if terms
+were not accepted and AU is not admin. Error forbiddenRole if role is
+not student unless AU is admin. Password required iff AU is admin, in
+which case a blocking password is recorded, preventing further access
+to the account.</font></p>
+<p style="margin-left: 0.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><font size="5"><u><b>Prss/{prsId}</b></u></font></font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><font size="4"><i><b>GET</b></i></font></font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font face="Times New Roman, serif">Returns
+object for Person {prsId}, with fields as specified in POST&nbsp;for
+Prss,&nbsp;plus dates&nbsp;</font><font face="Times New Roman, serif"><i>termsAccepted</i></font><font face="Times New Roman, serif">&nbsp;and&nbsp;</font><font face="Times New Roman, serif"><i>whenRegistered</i></font><font face="Times New Roman, serif">,
+less&nbsp;</font><font face="Times New Roman, serif"><i>password</i></font><font face="Times New Roman, serif">.&nbsp;The
+dates give time of term acceptance and registration, and will
+generally be equal, but are listed separately for legal reasons. AU
+must be person {prsId} or admin.</font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><font size="4"><i><b>PUT</b></i></font></font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font face="Times New Roman, serif">Update
+Person {prsId}, with body giving an object with one or more
+of&nbsp;</font><font face="Times New Roman, serif"><i>firstName</i></font><font face="Times New Roman, serif">,
+</font><font face="Times New Roman, serif"><i>lastName</i></font><font face="Times New Roman, serif">,
+</font><font face="Times New Roman, serif"><i>password</i></font><font face="Times New Roman, serif">,
+</font><font face="Times New Roman, serif"><i>role</i></font><font face="Times New Roman, serif">,&nbsp;but
+no other fields.&nbsp;All changes require the AU be the Person in
+question, or an admin. Role changes result in noPermission for
+nonadmins. Unless AU is admin, an additional field&nbsp;</font><font face="Times New Roman, serif"><i>oldPassword</i></font><font face="Times New Roman, serif">&nbsp;is
+required for changing&nbsp;</font><font face="Times New Roman, serif"><i>password</i></font><font face="Times New Roman, serif">.</font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font color="#7030a0"><font face="Times New Roman, serif"><font size="4"><i><b>DELETE</b></i></font></font></font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font face="Times New Roman, serif">Delete
+the Person in question, including all Cnvs and Msgs owned by Person.
+Requires admin AU.</font></p>
+<p style="margin-left: 0.5in; margin-bottom: 0.11in"><br><br>
+</p>
+<p style="margin-left: 0.5in; margin-bottom: 0.11in"><br><br>
+</p>
+<p style="margin-left: 0.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><font size="5"><u><b>Ssns</b></u></font></font></p>
+<p style="margin-left: 0.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif">Login
+sessions (Ssns)&nbsp;are required for most service&nbsp;access. A
+user obtains one via POST to Ssns.</font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><font size="4"><i><b>GET</b></i></font></font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font face="Times New Roman, serif">Returns
+a list of all active sessions. Admin-privileged AU required. Returns
+array of</font></p>
+<p style="margin-left: 1.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><i>cookie</i></font><font face="Times New Roman, serif">&nbsp;Unique
+cookie value for session</font></p>
+<p style="margin-left: 1.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><i>prsId</i></font><font face="Times New Roman, serif">&nbsp;ID
+of Person logged in</font></p>
+<p style="margin-left: 1.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><i>loginTime</i></font><font face="Times New Roman, serif">&nbsp;Date
+and time of login</font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><font size="4"><i><b>POST</b></i></font></font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font face="Times New Roman, serif">A
+successful POST&nbsp;generates a browser-session cookie that
+will&nbsp;permit continued access for 2&nbsp;hours. Indicated Person
+becomes the AU. An unsuccesful POST&nbsp;results in&nbsp;a&nbsp;400
+with a badLogin tag and no further information.</font></p>
+<p style="margin-left: 1.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><i>email</i></font><font face="Times New Roman, serif">&nbsp;Email
+of user requesting login</font></p>
+<p style="margin-left: 1.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><i>password</i></font><font face="Times New Roman, serif">&nbsp;Password
+of user</font></p>
+<p style="margin-left: 0.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><font size="5"><u><b>Ssns/{cookie}</b></u></font></font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><font size="4"><i><b>DELETE</b></i></font></font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font face="Times New Roman, serif">Log
+out the specified Session. AU must be owner of Session or admin.</font></p>
+<p style="margin-bottom: 0.11in"><br><br>
+</p>
+<p style="margin-bottom: 0.11in"><br><br>
+</p>
+<p style="margin-bottom: 0.11in"><font face="Times New Roman, serif"><font size="6" style="font-size: 22pt"><b>Resources
+for Conversations</b></font></font></p>
+<p style="text-indent: 0.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif">The
+following resources allow creation, deletion, and management of
+Conversations -- each a series of Messages.</font></p>
+<p style="margin-left: 0.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><font size="5"><u><b>Cnvs</b></u></font></font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><font size="4"><i><b>GET</b></i></font></font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font face="Times New Roman, serif">Any
+AU is acceptable. Return, for each Conversation in the system:</font></p>
+<p style="margin-left: 1.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><i>id</i></font><font face="Times New Roman, serif">&nbsp;Id
+of the Conversation</font></p>
+<p style="margin-left: 1.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><i>title</i></font><font face="Times New Roman, serif">&nbsp;Title
+of the Conversation</font></p>
+<p style="margin-left: 1.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><i>ownerId</i></font><font face="Times New Roman, serif">&nbsp;Owner
+of the Conversation</font></p>
+<p style="margin-left: 1.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><i>lastMessage</i></font><font face="Times New Roman, serif">&nbsp;int
+ms since epoch. When Conversation was last posted to. May be null.</font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><font size="4"><i><b>POST</b></i></font></font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font face="Times New Roman, serif">Create
+a new Conversation, owned by the current AU. Error dupTitle if title
+is a duplicate. Fields are</font></p>
+<p style="margin-left: 1in; text-indent: 0.5in; margin-bottom: 0.11in">
+<font face="Times New Roman, serif"><i>title</i></font><font face="Times New Roman, serif">&nbsp;Title
+of the new conversation, limited to 80 chars</font></p>
+<p style="margin-left: 0.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><font size="5"><u><b>Cnvs/{cnvId}</b></u></font></font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><font size="4"><i><b>PUT</b></i></font></font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font face="Times New Roman, serif">Update
+the title of the Conversation. Fields as for Conversations POST.
+Error dupTitle if title is duplicate. AU must be Conversation owner
+or admin.</font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><font size="4"><i><b>DELETE</b></i></font></font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font face="Times New Roman, serif">Delete
+the Conversation, including all associated Messages. AU must be
+Conversation owner or admin</font></p>
+<p style="margin-left: 0.5in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><font size="5"><u><b>Cnvs/{cnvId}/Msgs</b></u></font></font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><font size="4"><i><b>GET</b></i></font></font><font face="Times New Roman, serif"><font size="4">&nbsp;</font></font><font face="Times New Roman, serif">datetime
+={dateTime} num={num}</font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font face="Times New Roman, serif">Return
+all&nbsp;</font><font color="#2e74b5"><font face="Times New Roman, serif">top-level
+(not reply)&nbsp;</font></font><font face="Times New Roman, serif">Messages
+for the indicated Conversation, in reverse chronological order. Limit
+this to&nbsp;num&nbsp;Messages ending before&nbsp;datetime.
+If&nbsp;datetime&nbsp;is omitted, use current time. If&nbsp;num&nbsp;is
+omitted return all posts prior to the indicated date.&nbsp;Datetime&nbsp;is
+integer number of mS since epoch. Return for each Message, in
+increasing&nbsp;datetime&nbsp;order:</font></p>
+<p style="margin-left: 1in; text-indent: 0.5in; margin-bottom: 0.11in">
+<font face="Times New Roman, serif"><i>id</i></font><font face="Times New Roman, serif">&nbsp;Message
+ID</font></p>
+<p style="margin-left: 1in; text-indent: 0.5in; margin-bottom: 0.11in">
+<font face="Times New Roman, serif"><i>whenMade</i></font><font face="Times New Roman, serif">&nbsp;Date
+and time, in mS since epoch, when the Message was made</font></p>
+<p style="margin-left: 1in; text-indent: 0.5in; margin-bottom: 0.11in">
+<font face="Times New Roman, serif"><i>email</i></font><font face="Times New Roman, serif">&nbsp;Email
+of the poster</font></p>
+<p style="margin-left: 1in; text-indent: 0.5in; margin-bottom: 0.11in">
+<font face="Times New Roman, serif"><i>content</i></font><font face="Times New Roman, serif">&nbsp;Content
+of the Message,&nbsp;</font><font color="#2e74b5"><font face="Times New Roman, serif">first
+80 chars</font></font></p>
+<p style="margin-left: 1in; text-indent: 0.5in; margin-bottom: 0.11in">
+<font color="#2e74b5"><font face="Times New Roman, serif"><i>numLikes</i></font></font><font color="#2e74b5"><font face="Times New Roman, serif">&nbsp;Number
+of likes</font></font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font face="Times New Roman, serif"><font size="4"><i><b>POST</b></i></font></font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font face="Times New Roman, serif">Add
+a new Message, stamped with the current AU and date/time.</font></p>
+<p style="margin-left: 1in; text-indent: 0.5in; margin-bottom: 0.11in">
+<font face="Times New Roman, serif"><i>content</i></font><font face="Times New Roman, serif">&nbsp;Content
+of the Message, up to 5000 chars</font></p>
+<p style="margin-bottom: 0.11in"><br><br>
+</p>
+<p style="margin-bottom: 0.11in"><br><br>
+</p>
+<p style="margin-bottom: 0.11in"><br><br>
+</p>
+<p style="margin-bottom: 0.11in"><font color="#2e74b5"><font face="Times New Roman, serif"><font size="6" style="font-size: 22pt"><b>Resources
+for Messages</b></font></font></font></p>
+<p style="margin-left: 0.5in; margin-bottom: 0.11in"><font color="#2e74b5"><font face="Times New Roman, serif"><font size="5"><u><b>Msgs/{msgId}</b></u></font></font></font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font color="#2e74b5"><font face="Times New Roman, serif"><font size="4"><i><b>GET</b></i></font></font></font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font color="#2e74b5"><font face="Times New Roman, serif">Return
+the following for the indicated message.</font></font></p>
+<p style="margin-left: 1.5in; margin-bottom: 0.11in"><font color="#2e74b5"><font face="Times New Roman, serif"><i>content</i></font></font><font color="#2e74b5"><font face="Times New Roman, serif">&nbsp;Full
+content of the message</font></font></p>
+<p style="margin-left: 1.5in; margin-bottom: 0.11in"><font color="#2e74b5"><font face="Times New Roman, serif"><i>numLikes</i></font></font><font color="#2e74b5"><font face="Times New Roman, serif">&nbsp;number
+of Likes</font></font></p>
+<p style="margin-left: 1.5in; margin-bottom: 0.11in"><font color="#2e74b5"><font face="Times New Roman, serif"><i>replies</i></font></font><font color="#2e74b5"><font face="Times New Roman, serif">&nbsp;number
+of replies</font></font></p>
+<p style="margin-left: 0.5in; margin-bottom: 0.11in"><font color="#2e74b5"><font face="Times New Roman, serif"><font size="5"><u><b>Msgs/{msgId}/Replies</b></u></font></font></font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font color="#2e74b5"><font face="Times New Roman, serif"><font size="4"><i><b>GET</b></i></font></font></font><font color="#2e74b5"><font face="Times New Roman, serif"><font size="4">&nbsp;</font></font></font><font color="#2e74b5"><font face="Times New Roman, serif">datetime
+={dateTime} num={num}</font></font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font color="#2e74b5"><font face="Times New Roman, serif">As
+for Cnvs/{cnvId}/Msgs GET, but for replies to the indicated message.</font></font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font color="#2e74b5"><font face="Times New Roman, serif"><font size="4"><i><b>POST</b></i></font></font></font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font color="#2e74b5"><font face="Times New Roman, serif">As
+for Cnvs/{cnvId}/Msgs POST, but adds a reply to the indicated
+message.</font></font></p>
+<p style="margin-left: 0.5in; margin-bottom: 0.11in"><font color="#2e74b5"><font face="Times New Roman, serif"><font size="5"><u><b>Msgs/{msgId}/Likes</b></u></font></font></font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font color="#2e74b5"><font face="Times New Roman, serif"><font size="4"><i><b>GET</b></i></font></font></font><font color="#2e74b5"><font face="Times New Roman, serif"><font size="4">&nbsp;</font></font></font><font color="#2e74b5"><font face="Times New Roman, serif">num={numToReturn}</font></font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font color="#2e74b5"><font face="Times New Roman, serif">Return
+list of all first/last names of Persons who liked the Message, as
+array of objects of form:</font></font></p>
+<p style="margin-left: 1.5in; margin-bottom: 0.11in"><font color="#2e74b5"><font face="Times New Roman, serif">firstName&nbsp;First
+name of Person</font></font></p>
+<p style="margin-left: 1.5in; margin-bottom: 0.11in"><font color="#2e74b5"><font face="Times New Roman, serif">lastName&nbsp;Last
+name of Person</font></font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font color="#2e74b5"><font face="Times New Roman, serif">If&nbsp;num&nbsp;is
+specified, return the most recent&nbsp;num&nbsp;likes. In any event,
+return&nbsp;likes in last/first alphabetic order.</font></font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font color="#2e74b5"><font face="Times New Roman, serif"><font size="4"><i><b>POST</b></i></font></font></font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font color="#2e74b5"><font face="Times New Roman, serif">Post
+a new Like. Req body is empty since AU is the person doing the like.
+Repeated likes by same Person are simply ignored without error.</font></font></p>
+<p style="margin-bottom: 0.11in"><br><br>
+</p>
+<p style="margin-bottom: 0.11in"><br><br>
+</p>
+<p style="margin-bottom: 0.11in"><br><br>
+</p>
+<p style="margin-bottom: 0.11in"><font face="Times New Roman, serif"><font size="6" style="font-size: 22pt"><b>Special
+DB Resource for Testing Purposes</b></font></font></p>
+<p style="margin-left: 0.5in; margin-bottom: 0.11in"><font color="#7030a0"><font face="Times New Roman, serif"><font size="5"><u><b>DB</b></u></font></font></font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font color="#7030a0"><font face="Times New Roman, serif"><font size="4"><i><b>DELETE</b></i></font></font></font></p>
+<p style="margin-left: 1in; margin-bottom: 0.11in"><font face="Times New Roman, serif">Clear
+all content from the database, reset all autoincrement IDs to 1, and
+add back one Person, an admin named Joe Admin with email adm@11.com
+and password "password". Clear all current sessions. AU
+must be an admin.</font></p>
+
+</body></html>
