@@ -1,0 +1,17 @@
+<div style="margin-bottom: 15px">
+    <h2 id="dispInln">Messages for '{{cnv.title}}':</h2>
+    <button id="fltRight" class="btn btn-primary" ng-click="newMsg()" type="button">New Message</button>
+</div>
+
+<div class="list-group">
+    <uib-accordion close-others="false">
+        <div uib-accordion-group class="panel-default" heading="{{msg.email}} wrote:" is-open="isOpen"
+             ng-repeat="msg in msgs | reverse">
+            <div class="my-title">
+                <span>{{msg.content}}</span>
+                <b>{{msg.whenMade | date : 'mediumDate'}} at {{msg.whenMade | date : 'mediumTime'}}</b>
+            </div>
+            <div style="clear:both"></div>
+        </div>
+    </uib-accordion>
+</div>

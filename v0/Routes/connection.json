@@ -1,0 +1,7 @@
+{
+  "host" : "localhost",
+  "user" : "root",
+  "password" : "4booter",
+  "database" : "CHSdb",
+  "connectionLimit" : ""
+}

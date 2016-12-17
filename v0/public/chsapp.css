@@ -1,0 +1,319 @@
+.msg-header {
+  clear: both;
+  background-color: #EEF;
+}
+
+input[type=text] {
+  text-transform: capitalize;
+}
+
+.accordion-toggle:focus {
+  outline: none;
+}
+
+.my-title b {
+  float: right;
+}
+
+.my-title span {
+  display: inline;
+}
+
+#fltRight {
+  float: right;
+}
+
+#dispInln {
+  display: inline;
+}
+
+#my-textArea {
+  resize: none;
+}
+
+#big {
+  font-size: 150%;
+}
+
+.editDeleteBtn {
+  margin-top: 8px;
+}
+
+.login {
+  width: 300px;
+  height: 275px;
+  overflow: hidden;
+  background: #1e1e1e;
+  border-radius: 6px;
+  margin: 50px auto;
+  box-shadow: 0 0 30px rgba(0, 0, 0, .8);
+}
+
+.login .title {
+  width: 298px;
+  height: 14px;
+  padding-top: 10px;
+  padding-bottom: 27px;
+  font-size: 14px;
+  text-align: center;
+  color: #bfbfbf;
+  font-weight: bold;
+  background: #121212;
+  border: #2d2d2d solid 1px;
+  margin-bottom: 23px;
+  border-top-right-radius: 6px;
+  border-top-left-radius: 6px;
+  font-family: Arial, serif;
+}
+
+.login form {
+  width: 240px;
+  height: auto;
+  overflow: hidden;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.login form input[type=email], .login form input[type=password] {
+  width: 240px;
+  font-size: 12px;
+  padding-top: 14px;
+  padding-bottom: 14px;
+  padding-left: 20px;
+  border: none;
+  color: #bfbfbf;
+  background: #141414;
+  outline: none;
+  margin: 0;
+}
+
+.login form input[type=email]:focus, .login form input[type=password]:focus {
+  background: #383838;
+}
+
+.login form input[type=email] {
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  border-top: #0b0b0b solid 1px;
+}
+
+.login form input[type=password] {
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+  border-top: #0b0b0b 1px solid;
+  border-bottom: #353535 1px solid;
+}
+
+.login form .loginBttn:hover {
+  color: #fff;
+  background-color: #2e7b6f;
+  border-color: #2b695d;
+}
+
+.login form .registerBtn {
+  color: #949494;
+}
+
+.login form .registerBtn:hover {
+  color: #747474;
+  text-decoration: none;
+}
+
+.login form .loginBttn {
+  cursor: pointer;
+  margin-bottom: 10px;
+  margin-top: 28px;
+  width: 240px;
+  height: 45px;
+  display: block;
+  padding-top: 14px;
+  padding-bottom: 14px;
+  border-radius: 6px;
+  border: none;
+  border-top: #4eb2a8 1px solid;
+  border-bottom: #161616 1px solid;
+  background: #349e92;
+  text-align: center;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: bold;
+  color: #FFF;
+  text-shadow: 0 -1px #1d7464, 0 1px #7bb8b3;
+  font-family: Arial, serif;
+}
+
+.register {
+  width: 460px;
+  height: auto;
+  overflow: hidden;
+  background: #1e1e1e;
+  border-radius: 6px;
+  margin: 50px auto;
+  box-shadow: 0 0 30px rgba(0, 0, 0, .8);
+  padding-bottom: 30px;
+}
+
+.register .title {
+  width: auto;
+  height: 14px;
+  padding-top: 10px;
+  padding-bottom: 27px;
+  font-size: 14px;
+  text-align: center;
+  color: #bfbfbf;
+  font-weight: bold;
+  background: #121212;
+  border: #2d2d2d solid 1px;
+  margin-bottom: 23px;
+  border-top-right-radius: 6px;
+  border-top-left-radius: 6px;
+  font-family: Arial, serif;
+}
+
+.register form {
+  width: 400px;
+  height: auto;
+  overflow: hidden;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.register button {
+  vertical-align: top;
+  display: inline-block;
+  cursor: pointer;
+  margin-bottom: 10px;
+  margin-top: 28px;
+  width: 198px;
+  height: auto;
+  padding-top: 14px;
+  padding-bottom: 14px;
+  border-radius: 6px;
+  border: none;
+  border-top: #4eb2a8 1px solid;
+  border-bottom: #161616 1px solid;
+  background: #349e92;
+  text-align: center;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: bold;
+  color: #FFF;
+  text-shadow: 0 -1px #1d7464, 0 1px #7bb8b3;
+  font-family: Arial, serif;
+}
+
+.register input {
+  display: inline-block;
+  width: 100%;
+  white-space: normal;
+  vertical-align: top;
+  font-size: 12px;
+  padding-top: 14px;
+  padding-bottom: 14px;
+  padding-left: 20px;
+  border: none;
+  color: #bfbfbf;
+  background: #141414;
+  outline: none;
+  margin: 0;
+}
+
+.register input:focus {
+  background: #383838;
+}
+
+.register button.cancel {
+  border-top: #83540e 1px solid;
+  background: #794c0e;
+  text-shadow: 0 -1px #67502c, 0 1px #b8863c;
+}
+
+.register button.cancel:hover {
+  color: #dcdcdc;
+  border-top: #6f450e 1px solid;
+  background: #5b330e;
+  text-shadow: 0 -1px #554224, 0 1px #986f32;
+}
+
+.register button.submit:hover {
+  color: #dcdcdc;
+  border-top: #478e84 1px solid;
+  background: #256e65;
+  text-shadow: 0 -1px #16574c, 0 1px #598582;
+}
+
+.register button.submit:disabled {
+  cursor: not-allowed;
+  border-top: #848273 1px solid;
+  background: #757976;
+  text-shadow: 0 -1px #67645c, 0 1px #8d8778;
+}
+
+.register label {
+  margin-bottom: -3px;
+  color: #FFF;
+}
+
+/* registerCheckBox */
+.registerCheckBox input[type=checkbox] {
+  visibility: hidden;
+}
+
+.registerCheckBox {
+  position: relative;
+  color: #FFF;
+}
+
+.registerCheckBox label {
+  cursor: pointer;
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  top: 0;
+  border-radius: 4px;
+
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.5), 0 1px 0 rgba(255, 255, 255, .4);
+  -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.5), 0 1px 0 rgba(255, 255, 255, .4);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.5), 0 1px 0 rgba(255, 255, 255, .4);
+
+  background: -webkit-linear-gradient(top, #222 0%, #45484d 100%);
+  background: -moz-linear-gradient(top, #222 0%, #45484d 100%);
+  background: -o-linear-gradient(top, #222 0%, #45484d 100%);
+  background: -ms-linear-gradient(top, #222 0%, #45484d 100%);
+  background: linear-gradient(top, #222 0%, #45484d 100%);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#222', endColorstr='#45484d', GradientType=0);
+}
+
+.registerCheckBox label:after {
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+  filter: alpha(opacity=0);
+  opacity: 0;
+  content: '';
+  position: absolute;
+  width: 15px;
+  height: 9px;
+  background: transparent;
+  top: 4px;
+  left: 3px;
+  border: 3px solid #fcfff4;
+  border-top: none;
+  border-right: none;
+
+  -webkit-transform: rotate(-45deg);
+  -moz-transform: rotate(-45deg);
+  -o-transform: rotate(-45deg);
+  -ms-transform: rotate(-45deg);
+  transform: rotate(-45deg);
+}
+
+.registerCheckBox label:hover::after {
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=30)";
+  filter: alpha(opacity=30);
+  opacity: 0.3;
+}
+
+.registerCheckBox input[type=checkbox]:checked + label:after {
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+  filter: alpha(opacity=100);
+  opacity: 1;
+}

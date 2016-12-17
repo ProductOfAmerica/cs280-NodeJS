@@ -1,0 +1,20 @@
+<div class="modal-header">
+    <h3 class="modal-title">{{dlgTitle}}</h3>
+</div>
+<div class="modal-body">
+    <form>
+        <fieldset class="form-group">
+            <label>{{labelName}}</label>
+            <input ng-show="!isBody" type="text" class="form-control" placeholder="{{placeholder}}" ng-model="title">
+            <textarea ng-show="isBody" id="my-textArea" class="form-control" placeholder="{{placeholder}}" rows="7" cols="80"
+                      ng-model="title"></textarea>
+        </fieldset>
+    </form>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-primary" ng-disabled="!title"
+            ng-click="$close(title)">OK
+    </button>
+    <button type="button" class="btn btn-warning" ng-click="$dismiss()">Cancel</button>
+    <!--CHANGED 'type-"button"' to 'type="button"'-->
+</div>

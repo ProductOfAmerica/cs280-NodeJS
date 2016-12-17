@@ -1,0 +1,26 @@
+<!--<div>-->
+    <!--<form>-->
+        <!--<fieldset class="form-group">-->
+            <!--<label>Email address</label>-->
+            <!--<input type="email" class="form-control" placeholder="Email" ng-model="user.email">-->
+        <!--</fieldset>-->
+        <!--<fieldset class="form-group">-->
+            <!--<label>Password</label>-->
+            <!--<input type="password" class="form-control" placeholder="Password" ng-model="user.password">-->
+        <!--</fieldset>-->
+
+        <!--<button type="submit" class="btn btn-primary" ng-click="login()" ng-disabled="!user.password || !validateEmail(user.email)">-->
+            <!--Submit-->
+        <!--</button>-->
+    <!--</form>-->
+<!--</div>-->
+
+<section class="login">
+    <div class="title">CHS Login</div>
+    <form>
+        <input type="email" placeholder="Email" ng-model="user.email">
+        <input type="password" placeholder="Password" ng-model="user.password">
+        <a type="submit" class="loginBttn" ng-click="login()" ng-disabled="!user.password || !validateEmail(user.email)">Submit</a>
+        <a class="pull-right registerBtn" ui-sref="register">Register</a>
+    </form>
+</section>
